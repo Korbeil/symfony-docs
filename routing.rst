@@ -81,7 +81,7 @@ the ``list()`` method of the ``BlogController`` class.
     example, URLs like ``/blog?foo=bar`` and ``/blog?foo=bar&bar=foo`` will
     also match the ``blog_list`` route.
 
-.. caution::
+.. warning::
 
     If you define multiple PHP classes in the same file, Symfony only loads the
     routes of the first class, ignoring all the other routes.
@@ -298,7 +298,7 @@ arbitrary matching logic:
         # config/routes.yaml
         contact:
             path:       /contact
-            controller: 'App\Controller\DefaultController::contact'
+            controller: App\Controller\DefaultController::contact
             condition:  "context.getMethod() in ['GET', 'HEAD'] and request.headers.get('User-Agent') matches '/firefox/i'"
             # expressions can also include configuration parameters:
             # condition: "request.headers.get('User-Agent') matches '%app.allowed_browsers%'"
@@ -307,7 +307,7 @@ arbitrary matching logic:
 
         post_show:
             path:       /posts/{id}
-            controller: 'App\Controller\DefaultController::showPost'
+            controller: App\Controller\DefaultController::showPost
             # expressions can retrieve route parameter values using the "params" variable
             condition:  "params['id'] < 1000"
 
@@ -406,7 +406,7 @@ Behind the scenes, expressions are compiled down to raw PHP. Because of this,
 using the ``condition`` key causes no extra overhead beyond the time it takes
 for the underlying PHP to execute.
 
-.. caution::
+.. warning::
 
     Conditions are *not* taken into account when generating URLs (which is
     explained later in this article).
@@ -649,6 +649,51 @@ URL                       Route          Parameters
     contains a collection of commonly used regular-expression constants such as
     digits, dates and UUIDs which can be used as route parameter requirements.
 
+    .. configuration-block::
+
+        .. code-block:: php-attributes
+
+            // src/Controller/BlogController.php
+            namespace App\Controller;
+
+            use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+            use Symfony\Component\HttpFoundation\Response;
+            use Symfony\Component\Routing\Attribute\Route;
+            use Symfony\Component\Routing\Requirement\Requirement;
+
+            class BlogController extends AbstractController
+            {
+                #[Route('/blog/{page}', name: 'blog_list', requirements: ['page' => Requirement::DIGITS])]
+                public function list(int $page): Response
+                {
+                    // ...
+                }
+            }
+
+        .. code-block:: yaml
+
+            # config/routes.yaml
+            blog_list:
+                path:       /blog/{page}
+                controller: App\Controller\BlogController::list
+                requirements:
+                    page: !php/const Symfony\Component\Routing\Requirement\Requirement::DIGITS
+
+        .. code-block:: php
+
+            // config/routes.php
+            use App\Controller\BlogController;
+            use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+            use Symfony\Component\Routing\Requirement\Requirement;
+
+            return static function (RoutingConfigurator $routes): void {
+                $routes->add('blog_list', '/blog/{page}')
+                    ->controller([BlogController::class, 'list'])
+                    ->requirements(['page' => Requirement::DIGITS])
+                ;
+                // ...
+            };
+
 .. tip::
 
     Route requirements (and route paths too) can include
@@ -808,7 +853,7 @@ other configuration formats they are defined with the ``defaults`` option:
 Now, when the user visits ``/blog``, the ``blog_list`` route will match and
 ``$page`` will default to a value of ``1``.
 
-.. caution::
+.. warning::
 
     You can have more than one optional parameter (e.g. ``/blog/{slug}/{page}``),
     but everything after an optional parameter must be optional. For example,
@@ -1489,7 +1534,7 @@ when importing the routes.
             ;
         };
 
-.. caution::
+.. warning::
 
     The ``exclude`` option only works when the ``resource`` value is a glob string.
     If you use a regular string (e.g. ``'../src/Controller'``) the ``exclude``
@@ -2297,7 +2342,7 @@ use the ``generateUrl()`` helper::
         // the 'blog' route only defines the 'page' parameter; the generated URL is:
         // /blog/2?category=Symfony
 
-.. caution::
+.. warning::
 
     While objects are converted to string when used as placeholders, they are not
     converted when used as extra parameters. So, if you're passing an object (e.g. an Uuid)
@@ -2327,7 +2372,7 @@ the :class:`Symfony\\Component\\Routing\\Generator\\UrlGeneratorInterface` class
     class SomeService
     {
         public function __construct(
-            private UrlGeneratorInterface $router,
+            private UrlGeneratorInterface $urlGenerator,
         ) {
         }
 
@@ -2336,20 +2381,20 @@ the :class:`Symfony\\Component\\Routing\\Generator\\UrlGeneratorInterface` class
             // ...
 
             // generate a URL with no route arguments
-            $signUpPage = $this->router->generate('sign_up');
+            $signUpPage = $this->urlGenerator->generate('sign_up');
 
             // generate a URL with route arguments
-            $userProfilePage = $this->router->generate('user_profile', [
+            $userProfilePage = $this->urlGenerator->generate('user_profile', [
                 'username' => $user->getUserIdentifier(),
             ]);
 
             // generated URLs are "absolute paths" by default. Pass a third optional
             // argument to generate different URLs (e.g. an "absolute URL")
-            $signUpPage = $this->router->generate('sign_up', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            $signUpPage = $this->urlGenerator->generate('sign_up', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
             // when a route is localized, Symfony uses by default the current request locale
             // pass a different '_locale' value if you want to set the locale explicitly
-            $signUpPageInDutch = $this->router->generate('sign_up', ['_locale' => 'nl']);
+            $signUpPageInDutch = $this->urlGenerator->generate('sign_up', ['_locale' => 'nl']);
         }
     }
 

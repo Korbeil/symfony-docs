@@ -130,11 +130,12 @@ MercureBundle provides a more advanced configuration:
         mercure:
             hubs:
                 default:
-                    url: https://mercure-hub.example.com/.well-known/mercure
+                    url: '%env(string:MERCURE_URL)%'
+                    public_url: '%env(string:MERCURE_PUBLIC_URL)%'
                     jwt:
-                        secret: '!ChangeThisMercureHubJWTSecretKey!'
-                        publish: ['foo', 'https://example.com/foo']
-                        subscribe: ['bar', 'https://example.com/bar']
+                        secret: '%env(string:MERCURE_JWT_SECRET)%'
+                        publish: ['https://example.com/foo1', 'https://example.com/foo2']
+                        subscribe: ['https://example.com/bar1', 'https://example.com/bar2']
                         algorithm: 'hmac.sha256'
                         provider: 'My\Provider'
                         factory: 'My\Factory'
@@ -147,19 +148,20 @@ MercureBundle provides a more advanced configuration:
         <config>
             <hub
                 name="default"
-                url="https://mercure-hub.example.com/.well-known/mercure"
-            >
+                url="%env(string:MERCURE_URL)%"
+                public_url="%env(string:MERCURE_PUBLIC_URL)%"
+            > <!-- public_url defaults to url -->
                 <jwt
-                    secret="!ChangeThisMercureHubJWTSecretKey!"
+                    secret="%env(string:MERCURE_JWT_SECRET)%"
                     algorithm="hmac.sha256"
                     provider="My\Provider"
                     factory="My\Factory"
                     value="my.jwt"
                 >
-                    <publish>foo</publish>
-                    <publish>https://example.com/foo</publish>
-                    <subscribe>bar</subscribe>
-                    <subscribe>https://example.com/bar</subscribe>
+                    <publish>https://example.com/foo1</publish>
+                    <publish>https://example.com/foo2</publish>
+                    <subscribe>https://example.com/bar1</subscribe>
+                    <subscribe>https://example.com/bar2</subscribe>
                 </jwt>
             </hub>
         </config>
@@ -170,11 +172,12 @@ MercureBundle provides a more advanced configuration:
         $container->loadFromExtension('mercure', [
             'hubs' => [
                 'default' => [
-                    'url' => 'https://mercure-hub.example.com/.well-known/mercure',
+                    'url' => '%env(string:MERCURE_URL)%',
+                    'public_url' => '%env(string:MERCURE_PUBLIC_URL)%',
                     'jwt' => [
-                        'secret' => '!ChangeThisMercureHubJWTSecretKey!',
-                        'publish' => ['foo', 'https://example.com/foo'],
-                        'subscribe' => ['bar', 'https://example.com/bar'],
+                        'secret' => '%env(string:MERCURE_JWT_SECRET)%',
+                        'publish' => ['https://example.com/foo1', 'https://example.com/foo2'],
+                        'subscribe' => ['https://example.com/bar1', 'https://example.com/bar2'],
                         'algorithm' => 'hmac.sha256',
                         'provider' => 'My\Provider',
                         'factory' => 'My\Factory',
@@ -312,18 +315,12 @@ as patterns:
 
 .. tip::
 
-    Google Chrome DevTools natively integrate a `practical UI`_ displaying in live
-    the received events:
+    Google Chrome features a practical UI to display the received events:
 
     .. image:: /_images/mercure/chrome.png
         :alt: The Chrome DevTools showing the EventStream tab containing information about each SSE event.
 
-    To use it:
-
-    * open the DevTools
-    * select the "Network" tab
-    * click on the request to the Mercure hub
-    * click on the "EventStream" sub-tab.
+    In DevTools, select the "Network" tab, then click on the request to the Mercure hub, then on the "EventStream" sub-tab.
 
 Discovery
 ---------
@@ -445,7 +442,7 @@ Using cookies is the most secure and preferred way when the client is a web
 browser. If the client is not a web browser, then using an authorization header
 is the way to go.
 
-.. caution::
+.. warning::
 
     To use the cookie authentication method, the Symfony app and the Hub
     must be served from the same domain (can be different sub-domains).
@@ -676,7 +673,7 @@ sent:
         mercure.hub.default:
             class: App\Tests\Functional\Stub\HubStub
 
-As MercureBundle support multiple hubs, you may have to replace
+As MercureBundle supports multiple hubs, you may have to replace
 the other service definitions accordingly.
 
 .. tip::
@@ -689,8 +686,6 @@ Debugging
 .. versionadded:: 0.2
 
     The WebProfiler panel was introduced in MercureBundle 0.2.
-
-Enable the panel in your configuration, as follows:
 
 MercureBundle is shipped with a debug panel. Install the Debug pack to
 enable it::
@@ -766,7 +761,6 @@ Going further
 .. _`JSON Web Token`: https://tools.ietf.org/html/rfc7519
 .. _`example JWT`: https://jwt.io/#debugger-io?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOlsiKiJdfX0.iHLdpAEjX4BqCsHJEegxRmO-Y6sMxXwNATrQyRNt3GY
 .. _`IRI`: https://tools.ietf.org/html/rfc3987
-.. _`practical UI`: https://twitter.com/ChromeDevTools/status/562324683194785792
 .. _`the dedicated API Platform documentation`: https://api-platform.com/docs/core/mercure/
 .. _`the online debugger`: https://uri-template-tester.mercure.rocks
 .. _`a feature to test applications using Mercure`: https://github.com/symfony/panther#creating-isolated-browsers-to-test-apps-using-mercure-or-websocket

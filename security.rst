@@ -890,7 +890,7 @@ Finally, create or update the template:
         </form>
     {% endblock %}
 
-.. caution::
+.. warning::
 
     The ``error`` variable passed into the template is an instance
     of :class:`Symfony\\Component\\Security\\Core\\Exception\\AuthenticationException`.
@@ -1744,7 +1744,7 @@ You can log in a user programmatically using the ``login()`` method of the
 :class:`Symfony\\Bundle\\SecurityBundle\\Security` helper::
 
     // src/Controller/SecurityController.php
-    namespace App\Controller\SecurityController;
+    namespace App\Controller;
 
     use App\Security\Authenticator\ExampleAuthenticator;
     use Symfony\Bundle\SecurityBundle\Security;
@@ -2254,7 +2254,7 @@ Users with ``ROLE_SUPER_ADMIN``, will automatically have ``ROLE_ADMIN``,
 ``ROLE_ALLOWED_TO_SWITCH`` and ``ROLE_USER`` (inherited from
 ``ROLE_ADMIN``).
 
-.. caution::
+.. warning::
 
     For role hierarchy to work, do not use ``$user->getRoles()`` manually.
     For example, in a controller extending from the :ref:`base controller <the-base-controller-class-services>`::
